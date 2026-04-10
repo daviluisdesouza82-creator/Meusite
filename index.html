@@ -9,14 +9,25 @@
 
 <button onclick="iniciar()">JOGAR</button>
 
-<div id="jogo" style="display:none;">
+<div id="jogo" style="display:none; margin-top:20px;">
+
   <h2 id="fase">Fase 1</h2>
-  <p id="vida">Vida: 3</p>
+  <p id="vida">Vida: ❤️❤️❤️</p>
+
+  <!-- PERSONAGEM E INIMIGO -->
+  <div style="font-size:50px;">
+    <span id="player">🧑</span>
+    ⚔️
+    <span id="enemy">👾</span>
+  </div>
+
+  <br>
 
   <button onclick="atacar()">⚔️ Atacar</button>
   <button onclick="defender()">🛡️ Defender</button>
 
   <p id="status"></p>
+
 </div>
 
 <script>
@@ -29,22 +40,34 @@ function iniciar() {
 }
 
 function atualizar() {
-  document.getElementById("vida").innerText = "Vida: " + vida;
   document.getElementById("fase").innerText = "Fase " + fase;
+
+  let coracoes = "❤️".repeat(vida);
+  document.getElementById("vida").innerText = "Vida: " + coracoes;
 }
 
 function atacar() {
   inimigo--;
 
+  // animação ataque
+  document.getElementById("player").innerText = "⚔️";
+
+  setTimeout(() => {
+    document.getElementById("player").innerText = "🧑";
+  }, 300);
+
   if (inimigo <= 0) {
     fase++;
+
     if (fase > 10) {
       document.getElementById("status").innerText = "🏆 VOCÊ VENCEU!";
       reiniciar();
       return;
     }
+
     inimigo = fase + 2;
-    document.getElementById("status").innerText = "Próxima fase!";
+    document.getElementById("enemy").innerText = "💀";
+    document.getElementById("status").innerText = "Inimigo derrotado!";
   } else {
     tomarDano();
   }
@@ -53,11 +76,17 @@ function atacar() {
 }
 
 function defender() {
-  document.getElementById("status").innerText = "Defendeu!";
+  document.getElementById("status").innerText = "🛡️ Defendeu!";
 }
 
 function tomarDano() {
   vida--;
+
+  document.getElementById("enemy").innerText = "👹";
+
+  setTimeout(() => {
+    document.getElementById("enemy").innerText = "👾";
+  }, 300);
 
   if (vida <= 0) {
     document.getElementById("status").innerText = "💀 Você morreu!";
