@@ -1,10 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Meu site</title>
+  <title>Meu Jogo 🔥</title>
+  <style>
+    body {
+      background: black;
+      color: white;
+      text-align: center;
+      font-family: Arial;
+    }
+    button {
+      padding: 20px;
+      font-size: 20px;
+      background: lime;
+      border: none;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Salve 😎</h1>
-  <p>Meu primeiro site feito no celular!</p>
+
+<h1>🎮 Meu Jogo</h1>
+<p>Pontos: <span id="pontos">0</span></p>
+
+<button onclick="clicar()">CLICA AQUI 😎</button>
+
+<script>
+let pontos = 0;
+
+function clicar() {
+  pontos++;
+  document.getElementById("pontos").innerText = pontos;
+}
+</script>
+
 </body>
 </html>
