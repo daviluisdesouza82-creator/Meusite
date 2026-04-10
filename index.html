@@ -3,21 +3,20 @@
 <head>
   <title>Meu Jogo</title>
 </head>
-<body style="text-align:center; font-family:Arial;">
+<body style="text-align:center; font-family:Arial; background:#222; color:white;">
 
 <h1>🎮 Meu Jogo 🔥</h1>
 
-<button onclick="iniciar()">JOGAR</button>
+<button onclick="iniciar()" style="padding:10px; font-size:18px;">JOGAR</button>
 
 <div id="jogo" style="display:none; margin-top:20px;">
 
   <h2 id="fase">Fase 1</h2>
   <p id="vida">Vida: ❤️❤️❤️</p>
 
-  <!-- PERSONAGEM E INIMIGO -->
-  <div style="font-size:50px;">
+  <!-- AREA DO JOGO -->
+  <div style="font-size:60px; margin:20px;">
     <span id="player">🧑</span>
-    ⚔️
     <span id="enemy">👾</span>
   </div>
 
@@ -37,37 +36,40 @@ let inimigo = 3;
 
 function iniciar() {
   document.getElementById("jogo").style.display = "block";
+  animarInimigo();
 }
 
 function atualizar() {
   document.getElementById("fase").innerText = "Fase " + fase;
-
-  let coracoes = "❤️".repeat(vida);
-  document.getElementById("vida").innerText = "Vida: " + coracoes;
+  document.getElementById("vida").innerText = "Vida: " + "❤️".repeat(vida);
 }
 
 function atacar() {
   inimigo--;
 
-  // animação ataque
+  // animação player
   document.getElementById("player").innerText = "⚔️";
 
   setTimeout(() => {
     document.getElementById("player").innerText = "🧑";
-  }, 300);
+  }, 200);
 
   if (inimigo <= 0) {
     fase++;
 
     if (fase > 10) {
-      document.getElementById("status").innerText = "🏆 VOCÊ VENCEU!";
+      document.getElementById("status").innerText = "🏆 VENCEU!";
       reiniciar();
       return;
     }
 
     inimigo = fase + 2;
     document.getElementById("enemy").innerText = "💀";
-    document.getElementById("status").innerText = "Inimigo derrotado!";
+
+    setTimeout(() => {
+      document.getElementById("enemy").innerText = "👾";
+    }, 500);
+
   } else {
     tomarDano();
   }
@@ -92,6 +94,13 @@ function tomarDano() {
     document.getElementById("status").innerText = "💀 Você morreu!";
     reiniciar();
   }
+}
+
+function animarInimigo() {
+  setInterval(() => {
+    let enemy = document.getElementById("enemy");
+    enemy.style.transform = "translateX(" + (Math.random()*50 - 25) + "px)";
+  }, 500);
 }
 
 function reiniciar() {
