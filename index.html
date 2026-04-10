@@ -3,7 +3,7 @@
 <head>
   <title>Meu Jogo</title>
 </head>
-<body style="text-align:center; font-family:Arial; background:#222; color:white;">
+<body style="text-align:center; font-family:Arial; background:#111; color:white;">
 
 <h1>🎮 Meu Jogo 🔥</h1>
 
@@ -14,8 +14,8 @@
   <h2 id="fase">Fase 1</h2>
   <p id="vida">Vida: ❤️❤️❤️</p>
 
-  <!-- AREA DO JOGO -->
-  <div style="font-size:60px; margin:20px;">
+  <!-- CAMERA (mais alto e centralizado) -->
+  <div style="margin-top:40px; font-size:80px;">
     <span id="player">🧑</span>
     <span id="enemy">👾</span>
   </div>
@@ -32,11 +32,12 @@
 <script>
 let vida = 3;
 let fase = 1;
-let inimigo = 3;
+let inimigo = 5;
 
 function iniciar() {
   document.getElementById("jogo").style.display = "block";
   animarInimigo();
+  ataqueInimigo();
 }
 
 function atualizar() {
@@ -47,7 +48,6 @@ function atualizar() {
 function atacar() {
   inimigo--;
 
-  // animação player
   document.getElementById("player").innerText = "⚔️";
 
   setTimeout(() => {
@@ -63,15 +63,8 @@ function atacar() {
       return;
     }
 
-    inimigo = fase + 2;
-    document.getElementById("enemy").innerText = "💀";
-
-    setTimeout(() => {
-      document.getElementById("enemy").innerText = "👾";
-    }, 500);
-
-  } else {
-    tomarDano();
+    inimigo = fase * 2 + 3; // fases maiores
+    document.getElementById("status").innerText = "🔥 Próxima fase!";
   }
 
   atualizar();
@@ -81,33 +74,40 @@ function defender() {
   document.getElementById("status").innerText = "🛡️ Defendeu!";
 }
 
-function tomarDano() {
-  vida--;
+function ataqueInimigo() {
+  setInterval(() => {
+    if (vida <= 0) return;
 
-  document.getElementById("enemy").innerText = "👹";
+    vida--;
 
-  setTimeout(() => {
-    document.getElementById("enemy").innerText = "👾";
-  }, 300);
+    document.getElementById("enemy").innerText = "👹";
 
-  if (vida <= 0) {
-    document.getElementById("status").innerText = "💀 Você morreu!";
-    reiniciar();
-  }
+    setTimeout(() => {
+      document.getElementById("enemy").innerText = "👾";
+    }, 300);
+
+    if (vida <= 0) {
+      document.getElementById("status").innerText = "💀 Você morreu!";
+      reiniciar();
+    }
+
+    atualizar();
+
+  }, 2000); // inimigo ataca sozinho
 }
 
 function animarInimigo() {
   setInterval(() => {
     let enemy = document.getElementById("enemy");
-    enemy.style.transform = "translateX(" + (Math.random()*50 - 25) + "px)";
-  }, 500);
+    enemy.style.transform = "translateX(" + (Math.random()*80 - 40) + "px)";
+  }, 400);
 }
 
 function reiniciar() {
   setTimeout(() => {
     vida = 3;
     fase = 1;
-    inimigo = 3;
+    inimigo = 5;
     atualizar();
     document.getElementById("status").innerText = "";
   }, 2000);
