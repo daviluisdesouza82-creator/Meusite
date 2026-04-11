@@ -15,7 +15,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// player
+// player (sapo)
 let player = {
   x: canvas.width/2 - 25,
   y: canvas.height - 120,
@@ -24,15 +24,14 @@ let player = {
   speed: 7
 };
 
-// imagem
+// IMAGEM DO SAPO (CORRIGIDO)
 let img = new Image();
-img.src = "f6100026-ab9e-43a6-9280-93c8b1dadf45.png";
+img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png";
 
-// controles
+// controles mobile
 let moveLeft = false;
 let moveRight = false;
 
-// toque (celular)
 canvas.addEventListener("touchstart", e => {
   let x = e.touches[0].clientX;
   if(x < canvas.width/2) moveLeft = true;
@@ -44,7 +43,7 @@ canvas.addEventListener("touchend", () => {
   moveRight = false;
 });
 
-// teclado (PC)
+// teclado (pc)
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -87,7 +86,7 @@ function update(){
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // player
+  // player (sapo)
   ctx.drawImage(img, player.x, player.y, player.w, player.h);
 
   // obstáculos
