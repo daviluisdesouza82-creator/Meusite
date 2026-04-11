@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sapo Game 🐸🚗</title>
+  <title>Sapo Game 🐸</title>
 </head>
 
 <body style="margin:0; overflow:hidden; background:black;">
@@ -14,121 +14,121 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// 🐸 player
-let player;
-let obstacles;
-let gameOver;
-
-// imagem do sapo
+// imagem do sapo (com cache atualizado)
 let img = new Image();
-img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=5";
+img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=100";
 
-img.onload = () => startGame();
-
-// controles
-let moveLeft = false;
-let moveRight = false;
-
-// toque (celular)
-canvas.addEventListener("touchstart", e => {
-  let x = e.touches[0].clientX;
-  if (x < canvas.width / 2) moveLeft = true;
-  else moveRight = true;
-});
-
-canvas.addEventListener("touchend", () => {
-  moveLeft = false;
-  moveRight = false;
-});
-
-// teclado
-let keys = {};
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
-// criar obstáculos
-function spawnObstacle() {
-  obstacles.push({
-    x: Math.random() * (canvas.width - 60),
-    y: -60,
-    w: 60,
-    h: 60,
-    speed: 4 + Math.random() * 3
-  });
-}
+// variáveis
+let player, obstacles, gameOver;
 
 // iniciar jogo
-function startGame() {
+function resetGame(){
   player = {
-    x: canvas.width / 2 - 30,
-    y: canvas.height - 120,
-    w: 60,
-    h: 60,
-    speed: 7
+    x: canvas.width/2 - 60,
+    y: canvas.height - 150,
+    w: 120,
+    h: 120,
+    speed: 8
   };
 
   obstacles = [];
   gameOver = false;
-
-  setInterval(spawnObstacle, 1000);
-  update();
 }
 
-// detectar colisão
-function colide(a, b) {
-  return a.x < b.x + b.w &&
-         a.x + a.w > b.x &&
-         a.y < b.y + b.h &&
-         a.y + a.h > b.y;
+resetGame();
+
+// controles
+let left = false;
+let right = false;
+
+// celular
+canvas.addEventListener("touchstart", e=>{
+  let x = e.touches[0].clientX;
+  if(x < canvas.width/2) left = true;
+  else right = true;
+});
+
+canvas.addEventListener("touchend", ()=>{
+  left = false;
+  right = false;
+});
+
+// teclado
+document.addEventListener("keydown", e=>{
+  if(e.key === "ArrowLeft") left = true;
+  if(e.key === "ArrowRight") right = true;
+});
+
+document.addEventListener("keyup", e=>{
+  if(e.key === "ArrowLeft") left = false;
+  if(e.key === "ArrowRight") right = false;
+});
+
+// criar obstáculos
+function spawn(){
+  obstacles.push({
+    x: Math.random()*(canvas.width-60),
+    y: -60,
+    w: 60,
+    h: 60,
+    speed: 5 + Math.random()*3
+  });
+}
+
+setInterval(spawn, 900);
+
+// colisão
+function colide(a,b){
+  return a.x < b.x+b.w &&
+         a.x+a.w > b.x &&
+         a.y < b.y+b.h &&
+         a.y+a.h > b.y;
 }
 
 // loop do jogo
-function update() {
-  if (gameOver) return;
+function update(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if(!gameOver){
 
-  // movimento
-  if (keys["ArrowLeft"] || moveLeft) player.x -= player.speed;
-  if (keys["ArrowRight"] || moveRight) player.x += player.speed;
+    // movimento
+    if(left) player.x -= player.speed;
+    if(right) player.x += player.speed;
 
-  // limite tela
-  if (player.x < 0) player.x = 0;
-  if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
+    // limites
+    if(player.x < 0) player.x = 0;
+    if(player.x > canvas.width-player.w)
+      player.x = canvas.width-player.w;
 
-  // desenhar sapo
-  ctx.drawImage(img, player.x, player.y, player.w, player.h);
+    // desenhar sapo (FORÇADO GRANDE)
+    ctx.drawImage(img, player.x, player.y, player.w, player.h);
 
-  // obstáculos
-  obstacles.forEach(o => {
-    o.y += o.speed;
+    // obstáculos
+    for(let o of obstacles){
+      o.y += o.speed;
 
-    ctx.fillStyle = "red";
-    ctx.fillRect(o.x, o.y, o.w, o.h);
+      ctx.fillStyle = "red";
+      ctx.fillRect(o.x,o.y,o.w,o.h);
 
-    // colisão
-    if (colide(player, o)) {
-      gameOver = true;
-      showGameOver();
+      if(colide(player,o)){
+        gameOver = true;
+        setTimeout(resetGame, 1500);
+      }
     }
-  });
+
+  } else {
+    ctx.fillStyle="white";
+    ctx.font="30px Arial";
+    ctx.fillText("PERDEU 😭", canvas.width/2-80, canvas.height/2);
+  }
 
   requestAnimationFrame(update);
 }
 
-// tela de derrota
-function showGameOver() {
-  ctx.fillStyle = "white";
-  ctx.font = "30px Arial";
-  ctx.fillText("PERDEU 😭", canvas.width/2 - 80, canvas.height/2);
-
-  ctx.font = "20px Arial";
-  ctx.fillText("Toque pra reiniciar", canvas.width/2 - 100, canvas.height/2 + 40);
-
-  // reiniciar no toque
-  canvas.addEventListener("click", () => location.reload());
-  canvas.addEventListener("touchstart", () => location.reload());
-}
+// 🔥 só começa depois da imagem carregar
+img.onload = () => {
+  update();
+};
 </script>
 
 </body>
