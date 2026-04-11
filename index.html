@@ -24,18 +24,22 @@ let player = {
   y: canvas.height - 150,
   w: 120,
   h: 120,
-  speed: 10
+  speed: 8
 };
 
 // obstáculos
 let obstacles = [];
 
 // controles
-let left=false, right=false;
+let left=false, right=false, up=false;
 
-// 📱 MOBILE
-canvas.addEventListener("touchstart", e=>{
+// 📱 CONTROLE MOBILE (SUAVE)
+canvas.addEventListener("touchmove", e=>{
   let x = e.touches[0].clientX;
+
+  left = false;
+  right = false;
+  up = true; // sempre anda pra frente
 
   if(x < canvas.width/2) left = true;
   else right = true;
@@ -44,17 +48,20 @@ canvas.addEventListener("touchstart", e=>{
 canvas.addEventListener("touchend", ()=>{
   left=false;
   right=false;
+  up=false;
 });
 
-// ⌨️ TECLADO
+// ⌨️ teclado (opcional)
 document.addEventListener("keydown", e=>{
   if(e.key=="ArrowLeft") left=true;
   if(e.key=="ArrowRight") right=true;
+  if(e.key=="ArrowUp") up=true;
 });
 
 document.addEventListener("keyup", e=>{
   if(e.key=="ArrowLeft") left=false;
   if(e.key=="ArrowRight") right=false;
+  if(e.key=="ArrowUp") up=false;
 });
 
 // spawn obstáculos
@@ -64,15 +71,8 @@ function spawnObstacle(){
     y: -50,
     w: 50,
     h: 50,
-    speed: 4 + Math.random()*3
+    speed: 5
   });
-}
-
-// reset
-function resetGame(){
-  player.x = canvas.width/2 - 60;
-  player.y = canvas.height - 150;
-  obstacles = [];
 }
 
 // colisão
@@ -83,47 +83,50 @@ function collide(a,b){
          a.y + a.h > b.y;
 }
 
+// reset
+function resetGame(){
+  player.x = canvas.width/2 - 60;
+  player.y = canvas.height - 150;
+  obstacles = [];
+}
+
 // update
 function update(){
 
-  // movimento lateral
+  // movimento
   if(left) player.x -= player.speed;
   if(right) player.x += player.speed;
+  if(up) player.y -= 2;
 
-  // movimento pra frente automático
-  player.y -= 2;
+  // limites suaves (não trava)
+  if(player.x < -20) player.x = -20;
+  if(player.x > canvas.width - player.w + 20)
+    player.x = canvas.width - player.w + 20;
 
-  // limite topo
   if(player.y < 50) player.y = 50;
 
-  // limites laterais
-  if(player.x < 0) player.x = 0;
-  if(player.x > canvas.width - player.w)
-    player.x = canvas.width - player.w;
-
-  // atualizar obstáculos
+  // obstáculos
   for(let o of obstacles){
     o.y += o.speed;
 
-    if(collide(player, o)){
+    if(collide(player,o)){
       alert("PERDEU 😭");
       resetGame();
       return;
     }
   }
 
-  // limpar antigos
   obstacles = obstacles.filter(o => o.y < canvas.height);
 
   draw();
   requestAnimationFrame(update);
 }
 
-// desenhar
+// draw
 function draw(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // player (sapo)
+  // sapo
   ctx.drawImage(img, player.x, player.y, player.w, player.h);
 
   // obstáculos
@@ -133,7 +136,7 @@ function draw(){
   }
 }
 
-// iniciar
+// start
 img.onload = ()=>{
   setInterval(spawnObstacle, 1000);
   update();
