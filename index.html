@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sapo Runner 🐸🚗</title>
+  <title>Sapo Game 🐸🚗</title>
 </head>
 
 <body style="margin:0; overflow:hidden; background:black;">
@@ -14,23 +14,22 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// PLAYER
-let player = {
-  x: canvas.width / 2 - 40,
-  y: canvas.height - 120,
-  w: 80,
-  h: 80,
-  speed: 8
-};
+// 🐸 player
+let player;
+let obstacles;
+let gameOver;
 
-// IMAGEM DO SAPO
+// imagem do sapo
 let img = new Image();
-img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png";
+img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=5";
 
-// CONTROLES
+img.onload = () => startGame();
+
+// controles
 let moveLeft = false;
 let moveRight = false;
 
+// toque (celular)
 canvas.addEventListener("touchstart", e => {
   let x = e.touches[0].clientX;
   if (x < canvas.width / 2) moveLeft = true;
@@ -42,73 +41,94 @@ canvas.addEventListener("touchend", () => {
   moveRight = false;
 });
 
-// OBSTÁCULOS
-let obstacles = [];
+// teclado
+let keys = {};
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
 
-function spawnObstacle(){
+// criar obstáculos
+function spawnObstacle() {
   obstacles.push({
     x: Math.random() * (canvas.width - 60),
-    y: -80,
+    y: -60,
     w: 60,
     h: 60,
     speed: 4 + Math.random() * 3
   });
 }
 
-setInterval(spawnObstacle, 1000);
+// iniciar jogo
+function startGame() {
+  player = {
+    x: canvas.width / 2 - 30,
+    y: canvas.height - 120,
+    w: 60,
+    h: 60,
+    speed: 7
+  };
 
-// COLISÃO
-function collide(a, b){
-  return (
-    a.x < b.x + b.w &&
-    a.x + a.w > b.x &&
-    a.y < b.y + b.h &&
-    a.y + a.h > b.y
-  );
+  obstacles = [];
+  gameOver = false;
+
+  setInterval(spawnObstacle, 1000);
+  update();
 }
 
-// LOOP
-function update(){
+// detectar colisão
+function colide(a, b) {
+  return a.x < b.x + b.w &&
+         a.x + a.w > b.x &&
+         a.y < b.y + b.h &&
+         a.y + a.h > b.y;
+}
 
-  // mover lados
-  if (moveLeft) player.x -= player.speed;
-  if (moveRight) player.x += player.speed;
+// loop do jogo
+function update() {
+  if (gameOver) return;
 
-  // limites
-  if (player.x < 0) player.x = 0;
-  if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
-
-  // fundo
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // movimento
+  if (keys["ArrowLeft"] || moveLeft) player.x -= player.speed;
+  if (keys["ArrowRight"] || moveRight) player.x += player.speed;
+
+  // limite tela
+  if (player.x < 0) player.x = 0;
+  if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
+
   // desenhar sapo
-  if (img.complete && img.naturalWidth > 0) {
-    ctx.drawImage(img, player.x, player.y, player.w, player.h);
-  } else {
-    ctx.fillStyle = "green";
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-  }
+  ctx.drawImage(img, player.x, player.y, player.w, player.h);
 
-  // obstáculos (movimento pra frente)
-  ctx.fillStyle = "red";
-  obstacles.forEach((obs, i) => {
-    obs.y += obs.speed + 3; // 🚀 movimento de corrida
-    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
+  // obstáculos
+  obstacles.forEach(o => {
+    o.y += o.speed;
 
-    if (collide(player, obs)){
-      alert("💀 GAME OVER");
-      location.reload();
-    }
+    ctx.fillStyle = "red";
+    ctx.fillRect(o.x, o.y, o.w, o.h);
 
-    if (obs.y > canvas.height){
-      obstacles.splice(i, 1);
+    // colisão
+    if (colide(player, o)) {
+      gameOver = true;
+      showGameOver();
     }
   });
 
   requestAnimationFrame(update);
 }
 
-update();
+// tela de derrota
+function showGameOver() {
+  ctx.fillStyle = "white";
+  ctx.font = "30px Arial";
+  ctx.fillText("PERDEU 😭", canvas.width/2 - 80, canvas.height/2);
+
+  ctx.font = "20px Arial";
+  ctx.fillText("Toque pra reiniciar", canvas.width/2 - 100, canvas.height/2 + 40);
+
+  // reiniciar no toque
+  canvas.addEventListener("click", () => location.reload());
+  canvas.addEventListener("touchstart", () => location.reload());
+}
 </script>
 
 </body>
