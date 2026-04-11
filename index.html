@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Sapo Game 🐸</title>
+<title>Sapo Runner Infinito 🐸🔥</title>
 </head>
 
 <body style="margin:0; overflow:hidden; background:black;">
@@ -14,32 +14,34 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// imagem do sapo
+// imagem
 let img = new Image();
-img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=999";
+img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=2000";
 
-// player
+// player fixo
 let player = {
-  x: canvas.width/2 - 60,
-  y: canvas.height - 150,
-  w: 120,
-  h: 120,
+  x: canvas.width/2 - 40,
+  y: canvas.height - 120,
+  w: 80,
+  h: 80,
   speed: 8
 };
 
-// obstáculos
 let obstacles = [];
+let gameOver = false;
+
+// estrada animada
+let roadOffset = 0;
 
 // controles
-let left=false, right=false, up=false;
+let left=false, right=false;
 
-// 📱 CONTROLE MOBILE (SUAVE)
+// mobile
 canvas.addEventListener("touchmove", e=>{
   let x = e.touches[0].clientX;
 
   left = false;
   right = false;
-  up = true; // sempre anda pra frente
 
   if(x < canvas.width/2) left = true;
   else right = true;
@@ -48,97 +50,96 @@ canvas.addEventListener("touchmove", e=>{
 canvas.addEventListener("touchend", ()=>{
   left=false;
   right=false;
-  up=false;
 });
 
-// ⌨️ teclado (opcional)
-document.addEventListener("keydown", e=>{
-  if(e.key=="ArrowLeft") left=true;
-  if(e.key=="ArrowRight") right=true;
-  if(e.key=="ArrowUp") up=true;
-});
-
-document.addEventListener("keyup", e=>{
-  if(e.key=="ArrowLeft") left=false;
-  if(e.key=="ArrowRight") right=false;
-  if(e.key=="ArrowUp") up=false;
-});
-
-// spawn obstáculos
-function spawnObstacle(){
+// spawn
+function spawn(){
   obstacles.push({
-    x: Math.random() * (canvas.width - 50),
-    y: -50,
-    w: 50,
-    h: 50,
-    speed: 5
+    x: Math.random() * (canvas.width - 60),
+    y: -60,
+    w: 60,
+    h: 60,
+    speed: 6
   });
 }
 
 // colisão
 function collide(a,b){
-  return a.x < b.x + b.w &&
-         a.x + a.w > b.x &&
-         a.y < b.y + b.h &&
-         a.y + a.h > b.y;
+  return a.x < b.x+b.w &&
+         a.x+a.w > b.x &&
+         a.y < b.y+b.h &&
+         a.y+a.h > b.y;
 }
 
-// reset
-function resetGame(){
-  player.x = canvas.width/2 - 60;
-  player.y = canvas.height - 150;
+// restart
+function restart(){
   obstacles = [];
+  gameOver = false;
 }
 
 // update
 function update(){
 
-  // movimento
-  if(left) player.x -= player.speed;
-  if(right) player.x += player.speed;
-  if(up) player.y -= 2;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // limites suaves (não trava)
-  if(player.x < -20) player.x = -20;
-  if(player.x > canvas.width - player.w + 20)
-    player.x = canvas.width - player.w + 20;
+  if(!gameOver){
 
-  if(player.y < 50) player.y = 50;
+    // mover lados
+    if(left) player.x -= player.speed;
+    if(right) player.x += player.speed;
 
-  // obstáculos
-  for(let o of obstacles){
-    o.y += o.speed;
+    // atravessar parede
+    if(player.x < -player.w) player.x = canvas.width;
+    if(player.x > canvas.width) player.x = -player.w;
 
-    if(collide(player,o)){
-      alert("PERDEU 😭");
-      resetGame();
-      return;
+    // estrada infinita
+    roadOffset += 5;
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 5;
+
+    for(let i=0;i<canvas.height;i+=40){
+      ctx.beginPath();
+      ctx.moveTo(canvas.width/2, i + roadOffset % 40);
+      ctx.lineTo(canvas.width/2, i + 20 + roadOffset % 40);
+      ctx.stroke();
     }
+
+    // obstáculos
+    for(let o of obstacles){
+      o.y += o.speed;
+
+      ctx.fillStyle="red";
+      ctx.fillRect(o.x,o.y,o.w,o.h);
+
+      if(collide(player,o)){
+        gameOver = true;
+      }
+    }
+
+    obstacles = obstacles.filter(o => o.y < canvas.height);
+
+    // sapo
+    ctx.drawImage(img, player.x, player.y, player.w, player.h);
+
+  } else {
+    ctx.fillStyle="white";
+    ctx.font="30px Arial";
+    ctx.fillText("PERDEU 😭", canvas.width/2-80, canvas.height/2);
+    ctx.fillText("TOQUE PRA VOLTAR", canvas.width/2-100, canvas.height/2+40);
   }
 
-  obstacles = obstacles.filter(o => o.y < canvas.height);
-
-  draw();
   requestAnimationFrame(update);
 }
 
-// draw
-function draw(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-
-  // sapo
-  ctx.drawImage(img, player.x, player.y, player.w, player.h);
-
-  // obstáculos
-  ctx.fillStyle = "red";
-  for(let o of obstacles){
-    ctx.fillRect(o.x, o.y, o.w, o.h);
-  }
-}
+// revive
+canvas.addEventListener("touchstart", ()=>{
+  if(gameOver) restart();
+});
 
 // start
 img.onload = ()=>{
-  setInterval(spawnObstacle, 1000);
+  setInterval(spawn, 800);
   update();
 };
 </script>
