@@ -4,33 +4,39 @@
 <meta charset="UTF-8">
 <title>Welenom Runner 🌌</title>
 
-<!-- FORÇA UPDATE -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: black;
-  color: white;
-  font-family: Arial;
+  background: url("https://i.imgur.com/7b1QxZB.jpg");
+  background-size: cover;
 }
 
 #nave {
   position: absolute;
   bottom: 20px;
   left: 50%;
-  width: 50px;
-  height: 50px;
-  background: white;
+  width: 60px;
+  height: 60px;
+  background: url("https://i.imgur.com/Z6X7K8y.png");
+  background-size: cover;
+}
+
+.asteroide {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: url("https://i.imgur.com/3Wb8K7R.png");
+  background-size: cover;
 }
 
 #info {
   position: absolute;
   top: 10px;
   left: 10px;
+  color: white;
   font-size: 20px;
 }
 </style>
@@ -39,7 +45,7 @@ body {
 <body>
 
 <div id="nave"></div>
-<div id="info">Pontos: 0 | Galáxia: Via Láctea</div>
+<div id="info">Pontos: 0</div>
 
 <script>
 let nave = document.getElementById("nave");
@@ -47,25 +53,58 @@ let info = document.getElementById("info");
 
 let x = window.innerWidth / 2;
 let score = 0;
-let galaxia = "Via Láctea";
+let asteroides = [];
 
-// movimento
+// mover nave
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") x -= 20;
   if (e.key === "ArrowRight") x += 20;
-
   nave.style.left = x + "px";
 });
 
-// pontuação
+// criar asteroide
+function criarAsteroide() {
+  let a = document.createElement("div");
+  a.classList.add("asteroide");
+  a.style.left = Math.random() * window.innerWidth + "px";
+  a.style.top = "0px";
+  document.body.appendChild(a);
+  asteroides.push(a);
+}
+
+setInterval(criarAsteroide, 1000);
+
+// mover asteroides
 setInterval(() => {
   score++;
+  info.innerText = "Pontos: " + score;
 
-  if (score >= 100) galaxia = "Andrômeda";
-  if (score >= 200) galaxia = "Welenom 💀";
+  asteroides.forEach((a, i) => {
+    let top = parseInt(a.style.top);
+    a.style.top = top + 5 + "px";
 
-  info.innerText = "Pontos: " + score + " | Galáxia: " + galaxia;
-}, 200);
+    // colisão
+    let naveRect = nave.getBoundingClientRect();
+    let aRect = a.getBoundingClientRect();
+
+    if (
+      naveRect.left < aRect.right &&
+      naveRect.right > aRect.left &&
+      naveRect.top < aRect.bottom &&
+      naveRect.bottom > aRect.top
+    ) {
+      alert("💀 GAME OVER");
+      location.reload();
+    }
+
+    // remover se sair da tela
+    if (top > window.innerHeight) {
+      a.remove();
+      asteroides.splice(i, 1);
+    }
+  });
+
+}, 50);
 </script>
 
 </body>
