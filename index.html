@@ -15,7 +15,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// player (sapo)
+// player
 let player = {
   x: canvas.width/2 - 25,
   y: canvas.height - 120,
@@ -24,11 +24,14 @@ let player = {
   speed: 7
 };
 
-// IMAGEM DO SAPO (CORRIGIDO)
+// imagem
 let img = new Image();
 img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png";
 
-// controles mobile
+// espera carregar
+img.onload = () => startGame();
+
+// controles
 let moveLeft = false;
 let moveRight = false;
 
@@ -43,7 +46,7 @@ canvas.addEventListener("touchend", () => {
   moveRight = false;
 });
 
-// teclado (pc)
+// teclado
 let keys = {};
 document.addEventListener("keydown", e => keys[e.key] = true);
 document.addEventListener("keyup", e => keys[e.key] = false);
@@ -61,7 +64,11 @@ function spawnObstacle(){
   });
 }
 
-setInterval(spawnObstacle, 1000);
+// inicia jogo só depois da imagem carregar
+function startGame(){
+  setInterval(spawnObstacle, 1000);
+  update();
+}
 
 // colisão
 function collide(a, b){
@@ -74,22 +81,20 @@ function collide(a, b){
 // loop
 function update(){
 
-  // movimento
   if(keys["ArrowLeft"] || keys["a"] || moveLeft) player.x -= player.speed;
   if(keys["ArrowRight"] || keys["d"] || moveRight) player.x += player.speed;
 
-  // limites
   if(player.x < 0) player.x = 0;
   if(player.x + player.w > canvas.width) player.x = canvas.width - player.w;
 
-  // fundo
   ctx.fillStyle = "black";
   ctx.fillRect(0,0,canvas.width,canvas.height);
 
-  // player (sapo)
-  ctx.drawImage(img, player.x, player.y, player.w, player.h);
+  // só desenha se carregou
+  if(img.complete){
+    ctx.drawImage(img, player.x, player.y, player.w, player.h);
+  }
 
-  // obstáculos
   ctx.fillStyle = "red";
   for(let i=0;i<obstacles.length;i++){
     let o = obstacles[i];
@@ -105,8 +110,6 @@ function update(){
 
   requestAnimationFrame(update);
 }
-
-update();
 </script>
 
 </body>
