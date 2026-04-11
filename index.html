@@ -5,7 +5,6 @@
 </head>
 
 <body style="margin:0; overflow:hidden; background:black;">
-
 <canvas id="game"></canvas>
 
 <script>
@@ -15,29 +14,26 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// player
+// PLAYER (SAPO)
 let player = {
-  x: canvas.width/2 - 25,
+  x: canvas.width / 2 - 40,
   y: canvas.height - 120,
-  w: 50,
-  h: 50,
-  speed: 7
+  w: 80,
+  h: 80,
+  speed: 8
 };
 
-// imagem
+// IMAGEM DO SAPO (RAW CORRETO)
 let img = new Image();
-img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png";
+img.src = "https://raw.githubusercontent.com/daviluisdesouza82-creator/Meusite/main/f6100026-ab9e-43a6-9280-93c8b1dadf45.png?v=2";
 
-// espera carregar
-img.onload = () => startGame();
-
-// controles
+// CONTROLES MOBILE
 let moveLeft = false;
 let moveRight = false;
 
 canvas.addEventListener("touchstart", e => {
   let x = e.touches[0].clientX;
-  if(x < canvas.width/2) moveLeft = true;
+  if (x < canvas.width / 2) moveLeft = true;
   else moveRight = true;
 });
 
@@ -46,12 +42,7 @@ canvas.addEventListener("touchend", () => {
   moveRight = false;
 });
 
-// teclado
-let keys = {};
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-
-// obstáculos
+// OBSTÁCULOS
 let obstacles = [];
 
 function spawnObstacle(){
@@ -60,56 +51,67 @@ function spawnObstacle(){
     y: -60,
     w: 50,
     h: 50,
-    speed: 4 + Math.random()*3
+    speed: 4 + Math.random() * 3
   });
 }
 
-// inicia jogo só depois da imagem carregar
-function startGame(){
-  setInterval(spawnObstacle, 1000);
-  update();
-}
+setInterval(spawnObstacle, 1000);
 
-// colisão
+// DETECÇÃO DE COLISÃO
 function collide(a, b){
-  return a.x < b.x + b.w &&
-         a.x + a.w > b.x &&
-         a.y < b.y + b.h &&
-         a.y + a.h > b.y;
+  return (
+    a.x < b.x + b.w &&
+    a.x + a.w > b.x &&
+    a.y < b.y + b.h &&
+    a.y + a.h > b.y
+  );
 }
 
-// loop
+// LOOP DO JOGO
 function update(){
 
-  if(keys["ArrowLeft"] || keys["a"] || moveLeft) player.x -= player.speed;
-  if(keys["ArrowRight"] || keys["d"] || moveRight) player.x += player.speed;
+  // mover sapo
+  if (moveLeft) player.x -= player.speed;
+  if (moveRight) player.x += player.speed;
 
-  if(player.x < 0) player.x = 0;
-  if(player.x + player.w > canvas.width) player.x = canvas.width - player.w;
+  // limites
+  if (player.x < 0) player.x = 0;
+  if (player.x + player.w > canvas.width) player.x = canvas.width - player.w;
 
-  ctx.fillStyle = "black";
-  ctx.fillRect(0,0,canvas.width,canvas.height);
+  // limpar tela
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // só desenha se carregou
-  if(img.complete){
+  // desenhar sapo
+  if (img.complete) {
     ctx.drawImage(img, player.x, player.y, player.w, player.h);
+  } else {
+    ctx.fillStyle = "green";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
   }
 
+  // obstáculos
   ctx.fillStyle = "red";
-  for(let i=0;i<obstacles.length;i++){
-    let o = obstacles[i];
-    o.y += o.speed;
+  obstacles.forEach((obs, i) => {
+    obs.y += obs.speed;
+    ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-    ctx.fillRect(o.x, o.y, o.w, o.h);
-
-    if(collide(player, o)){
-      alert("💀 GAME OVER");
+    if (collide(player, obs)){
+      alert("Perdeu 😭");
       location.reload();
     }
-  }
+
+    if (obs.y > canvas.height){
+      obstacles.splice(i, 1);
+    }
+  });
 
   requestAnimationFrame(update);
 }
+
+// ESPERA A IMAGEM CARREGAR
+img.onload = () => {
+  update();
+};
 </script>
 
 </body>
