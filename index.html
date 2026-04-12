@@ -4,34 +4,35 @@
 <meta charset="UTF-8">
 <title>Welenom Runner 🌌</title>
 
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-
 <style>
 body {
   margin: 0;
   overflow: hidden;
-  background: url("https://i.imgur.com/7b1QxZB.jpg");
+  background: url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa");
   background-size: cover;
 }
 
+/* NAVE */
 #nave {
   position: absolute;
   bottom: 20px;
   left: 50%;
   width: 60px;
   height: 60px;
-  background: url("https://i.imgur.com/Z6X7K8y.png");
+  background: url("https://cdn-icons-png.flaticon.com/512/3212/3212608.png");
   background-size: cover;
 }
 
+/* ASTEROIDE */
 .asteroide {
   position: absolute;
   width: 40px;
   height: 40px;
-  background: url("https://i.imgur.com/3Wb8K7R.png");
+  background: url("https://cdn-icons-png.flaticon.com/512/616/616490.png");
   background-size: cover;
 }
 
+/* TEXTO */
 #info {
   position: absolute;
   top: 10px;
@@ -45,7 +46,7 @@ body {
 <body>
 
 <div id="nave"></div>
-<div id="info">Pontos: 0</div>
+<div id="info">Pontos: 0 | Galáxia: Via Láctea</div>
 
 <script>
 let nave = document.getElementById("nave");
@@ -53,12 +54,13 @@ let info = document.getElementById("info");
 
 let x = window.innerWidth / 2;
 let score = 0;
+let galaxia = "Via Láctea";
 let asteroides = [];
 
 // mover nave
 document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft") x -= 20;
-  if (e.key === "ArrowRight") x += 20;
+  if (e.key === "ArrowLeft") x -= 25;
+  if (e.key === "ArrowRight") x += 25;
   nave.style.left = x + "px";
 });
 
@@ -74,30 +76,34 @@ function criarAsteroide() {
 
 setInterval(criarAsteroide, 1000);
 
-// mover asteroides
+// loop do jogo
 setInterval(() => {
   score++;
-  info.innerText = "Pontos: " + score;
+
+  if (score >= 100) galaxia = "Andrômeda";
+  if (score >= 200) galaxia = "Welenom 💀";
+
+  info.innerText = "Pontos: " + score + " | Galáxia: " + galaxia;
 
   asteroides.forEach((a, i) => {
     let top = parseInt(a.style.top);
-    a.style.top = top + 5 + "px";
+    a.style.top = top + 6 + "px";
 
-    // colisão
     let naveRect = nave.getBoundingClientRect();
     let aRect = a.getBoundingClientRect();
 
+    // colisão
     if (
       naveRect.left < aRect.right &&
       naveRect.right > aRect.left &&
       naveRect.top < aRect.bottom &&
       naveRect.bottom > aRect.top
     ) {
-      alert("💀 GAME OVER");
+      alert("GAME OVER 💀");
       location.reload();
     }
 
-    // remover se sair da tela
+    // remover da tela
     if (top > window.innerHeight) {
       a.remove();
       asteroides.splice(i, 1);
