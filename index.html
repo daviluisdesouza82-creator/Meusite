@@ -8,8 +8,9 @@
 body {
   margin: 0;
   overflow: hidden;
-  background: url("https://images.unsplash.com/photo-1446776811953-b23d57bd21aa");
-  background-size: cover;
+  background: black;
+  color: white;
+  font-family: Arial;
 }
 
 /* NAVE */
@@ -19,8 +20,7 @@ body {
   left: 50%;
   width: 60px;
   height: 60px;
-  background: url("https://cdn-icons-png.flaticon.com/512/3212/3212608.png");
-  background-size: cover;
+  background: cyan;
 }
 
 /* ASTEROIDE */
@@ -28,8 +28,8 @@ body {
   position: absolute;
   width: 40px;
   height: 40px;
-  background: url("https://cdn-icons-png.flaticon.com/512/616/616490.png");
-  background-size: cover;
+  background: gray;
+  border-radius: 50%;
 }
 
 /* TEXTO */
@@ -37,7 +37,6 @@ body {
   position: absolute;
   top: 10px;
   left: 10px;
-  color: white;
   font-size: 20px;
 }
 </style>
@@ -59,8 +58,8 @@ let asteroides = [];
 
 // mover nave
 document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft") x -= 25;
-  if (e.key === "ArrowRight") x += 25;
+  if (e.key === "ArrowLeft") x -= 30;
+  if (e.key === "ArrowRight") x += 30;
   nave.style.left = x + "px";
 });
 
@@ -74,7 +73,7 @@ function criarAsteroide() {
   asteroides.push(a);
 }
 
-setInterval(criarAsteroide, 1000);
+setInterval(criarAsteroide, 800);
 
 // loop do jogo
 setInterval(() => {
@@ -87,7 +86,7 @@ setInterval(() => {
 
   asteroides.forEach((a, i) => {
     let top = parseInt(a.style.top);
-    a.style.top = top + 6 + "px";
+    a.style.top = top + 7 + "px";
 
     let naveRect = nave.getBoundingClientRect();
     let aRect = a.getBoundingClientRect();
@@ -103,7 +102,7 @@ setInterval(() => {
       location.reload();
     }
 
-    // remover da tela
+    // remover
     if (top > window.innerHeight) {
       a.remove();
       asteroides.splice(i, 1);
