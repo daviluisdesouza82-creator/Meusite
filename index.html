@@ -1,73 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Welenom Runner 🌌</title>
-
-<style>
-body {
-  margin: 0;
-  overflow: hidden;
-  background: black;
-  color: white;
-  font-family: Arial;
-}
-
-/* NAVE */
-#nave {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  width: 60px;
-  height: 60px;
-  background: cyan;
-}
-
-/* ASTEROIDE */
-.asteroide {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background: gray;
-  border-radius: 50%;
-}
-
-/* TEXTO */
-#info {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  font-size: 20px;
-}
-</style>
-</head>
-
-<body>
-
-<div id="nave"></div>
-<div id="info">Pontos: 0 | Galáxia: Via Láctea</div>
-
 <script>
 let nave = document.getElementById("nave");
 let info = document.getElementById("info");
 
-let x = window.innerWidth / 2;
+let x = window.innerWidth / 2 - 40; // centralizado
 let score = 0;
-let galaxia = "Via Láctea";
 let asteroides = [];
 
 // mover nave
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowLeft") x -= 30;
   if (e.key === "ArrowRight") x += 30;
+
+  // não sair da tela
+  if (x < 0) x = 0;
+  if (x > window.innerWidth - 80) x = window.innerWidth - 80;
+
   nave.style.left = x + "px";
 });
 
 // criar asteroide
 function criarAsteroide() {
   let a = document.createElement("div");
-  a.classList.add("asteroide");
-  a.style.left = Math.random() * window.innerWidth + "px";
+  a.className = "asteroide";
+  a.style.left = Math.random() * (window.innerWidth - 40) + "px";
   a.style.top = "0px";
   document.body.appendChild(a);
   asteroides.push(a);
@@ -78,14 +33,10 @@ setInterval(criarAsteroide, 800);
 // loop do jogo
 setInterval(() => {
   score++;
-
-  if (score >= 100) galaxia = "Andrômeda";
-  if (score >= 200) galaxia = "Welenom 💀";
-
-  info.innerText = "Pontos: " + score + " | Galáxia: " + galaxia;
+  info.innerText = "Pontos: " + score;
 
   asteroides.forEach((a, i) => {
-    let top = parseInt(a.style.top);
+    let top = parseInt(a.style.top) || 0;
     a.style.top = top + 7 + "px";
 
     let naveRect = nave.getBoundingClientRect();
@@ -102,7 +53,7 @@ setInterval(() => {
       location.reload();
     }
 
-    // remover
+    // remover quando sair
     if (top > window.innerHeight) {
       a.remove();
       asteroides.splice(i, 1);
@@ -111,6 +62,3 @@ setInterval(() => {
 
 }, 50);
 </script>
-
-</body>
-</html>
