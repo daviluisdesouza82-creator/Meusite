@@ -1,118 +1,114 @@
  <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DEPE Calculadora</title>
-
+<title>Nyan Mobile</title>
 <style>
-body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-}
+  body {
+    margin:0;
+    background:black;
+    text-align:center;
+    color:white;
+    font-family:sans-serif;
+  }
 
-header {
-    text-align: center;
-    padding: 15px;
-    font-size: 24px;
-    font-weight: bold;
-    background: #111;
-    border-bottom: 1px solid #333;
-}
+  canvas {
+    background:#111;
+    display:block;
+    margin:auto;
+  }
 
-#display {
-    padding: 20px;
-    font-size: 32px;
-    text-align: right;
-    background: #000;
-    min-height: 60px;
-}
+  .controls {
+    margin-top:10px;
+  }
 
-#buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 5px;
-    padding: 10px;
-    flex: 1;
-}
-
-button {
-    padding: 20px;
-    font-size: 20px;
-    border-radius: 12px;
-    border: none;
-    background: #222;
-    color: white;
-}
-
-.op {
-    background: #ff9800;
-}
-
-.equal {
-    background: #00c853;
-}
-
-.clear {
-    background: #e53935;
-}
+  button {
+    width:90px;
+    height:50px;
+    font-size:18px;
+    margin:5px;
+  }
 </style>
 </head>
-
 <body>
 
-<header>🧮 DEPE</header>
+<canvas id="game" width="300" height="400"></canvas>
 
-<div id="display">0</div>
-
-<div id="buttons">
-    <button onclick="add('7')">7</button>
-    <button onclick="add('8')">8</button>
-    <button onclick="add('9')">9</button>
-    <button class="op" onclick="add('/')">÷</button>
-
-    <button onclick="add('4')">4</button>
-    <button onclick="add('5')">5</button>
-    <button onclick="add('6')">6</button>
-    <button class="op" onclick="add('*')">×</button>
-
-    <button onclick="add('1')">1</button>
-    <button onclick="add('2')">2</button>
-    <button onclick="add('3')">3</button>
-    <button class="op" onclick="add('-')">−</button>
-
-    <button onclick="add('0')">0</button>
-    <button onclick="add('.')">.</button>
-    <button class="equal" onclick="calc()">=</button>
-    <button class="op" onclick="add('+')">+</button>
-
-    <button class="clear" onclick="clearDisplay()">C</button>
+<div class="controls">
+  <button onclick="jump()">⬆️ Voar</button>
+  <button onclick="pauseGame()">⏸</button>
+  <button onclick="restartGame()">🔄</button>
 </div>
 
+<h2 id="score">Score: 0</h2>
+
 <script>
-let display = document.getElementById("display");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-function add(val) {
-    if (display.innerText === "0") display.innerText = "";
-    display.innerText += val;
+let img = new Image();
+img.src = "https://upload.wikimedia.org/wikipedia/en/2/2c/Nyan_cat_250px_frame.PNG";
+
+let y = 150;
+let velocity = 0;
+let gravity = 0.6;
+let score = 0;
+let running = true;
+
+// botão
+function jump() {
+  if (running) velocity = -10;
 }
 
-function clearDisplay() {
-    display.innerText = "0";
+// toque na tela também funciona
+canvas.addEventListener("touchstart", () => {
+  jump();
+});
+
+function draw() {
+  ctx.clearRect(0,0,300,400);
+
+  ctx.drawImage(img, 110, y, 80, 50);
+
+  ctx.fillStyle = "white";
+  ctx.fillText("Toque pra voar", 90, 20);
 }
 
-function calc() {
-    try {
-        display.innerText = eval(display.innerText);
-    } catch {
-        display.innerText = "Erro";
+function update() {
+  if (running) {
+    velocity += gravity;
+    y += velocity;
+
+    score++;
+    document.getElementById("score").innerText = "Score: " + score;
+
+    // limites
+    if (y > 350) {
+      y = 350;
+      velocity = 0;
     }
+    if (y < 0) {
+      y = 0;
+      velocity = 0;
+    }
+  }
+
+  draw();
+  requestAnimationFrame(update);
 }
+
+function pauseGame() {
+  running = !running;
+}
+
+function restartGame() {
+  y = 150;
+  velocity = 0;
+  score = 0;
+  running = true;
+}
+
+update();
 </script>
 
 </body>
