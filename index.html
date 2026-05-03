@@ -1,46 +1,63 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nyan Mobile</title>
+<title>Nyan Game</title>
+
 <style>
-  body {
-    margin:0;
-    background:black;
-    text-align:center;
-    color:white;
-    font-family:sans-serif;
-  }
+body {
+  margin:0;
+  background:black;
+  color:white;
+  font-family:sans-serif;
+  text-align:center;
+}
 
-  canvas {
-    background:#111;
-    display:block;
-    margin:auto;
-  }
+/* jogo */
+canvas {
+  background:#111;
+  display:block;
+  margin:auto;
+}
 
-  .controls {
-    margin-top:10px;
-  }
+/* botões embaixo */
+.controls {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #000;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+}
 
-  button {
-    width:90px;
-    height:50px;
-    font-size:18px;
-    margin:5px;
-  }
+button {
+  width: 90px;
+  height: 50px;
+  font-size: 18px;
+}
+
+/* espaço pro botão não tampar o jogo */
+.spacer {
+  height: 80px;
+}
 </style>
 </head>
+
 <body>
 
-<canvas id="game" width="300" height="400"></canvas>
+<h2 id="score">Score: 0</h2>
+
+<canvas id="game" width="300" height="350"></canvas>
+
+<div class="spacer"></div>
 
 <div class="controls">
-  <button onclick="jump()">⬆️ Voar</button>
+  <button onclick="jump()">⬆️</button>
   <button onclick="pauseGame()">⏸</button>
   <button onclick="restartGame()">🔄</button>
 </div>
-
-<h2 id="score">Score: 0</h2>
 
 <script>
 const canvas = document.getElementById("game");
@@ -60,13 +77,14 @@ function jump() {
   if (running) velocity = -10;
 }
 
-// toque na tela também funciona
+// toque na tela
 canvas.addEventListener("touchstart", () => {
   jump();
 });
 
+// desenhar
 function draw() {
-  ctx.clearRect(0,0,300,400);
+  ctx.clearRect(0,0,300,350);
 
   ctx.drawImage(img, 110, y, 80, 50);
 
@@ -74,6 +92,7 @@ function draw() {
   ctx.fillText("Toque pra voar", 90, 20);
 }
 
+// atualizar
 function update() {
   if (running) {
     velocity += gravity;
@@ -82,9 +101,8 @@ function update() {
     score++;
     document.getElementById("score").innerText = "Score: " + score;
 
-    // limites
-    if (y > 350) {
-      y = 350;
+    if (y > 300) {
+      y = 300;
       velocity = 0;
     }
     if (y < 0) {
@@ -97,10 +115,12 @@ function update() {
   requestAnimationFrame(update);
 }
 
+// pause
 function pauseGame() {
   running = !running;
 }
 
+// restart
 function restartGame() {
   y = 150;
   velocity = 0;
