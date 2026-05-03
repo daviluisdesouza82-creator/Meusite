@@ -1,64 +1,119 @@
-<script>
-let nave = document.getElementById("nave");
-let info = document.getElementById("info");
+ <!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DEPE Calculadora</title>
 
-let x = window.innerWidth / 2 - 40; // centralizado
-let score = 0;
-let asteroides = [];
-
-// mover nave
-document.addEventListener("keydown", (e) => {
-  if (e.key === "ArrowLeft") x -= 30;
-  if (e.key === "ArrowRight") x += 30;
-
-  // não sair da tela
-  if (x < 0) x = 0;
-  if (x > window.innerWidth - 80) x = window.innerWidth - 80;
-
-  nave.style.left = x + "px";
-});
-
-// criar asteroide
-function criarAsteroide() {
-  let a = document.createElement("div");
-  a.className = "asteroide";
-  a.style.left = Math.random() * (window.innerWidth - 40) + "px";
-  a.style.top = "0px";
-  document.body.appendChild(a);
-  asteroides.push(a);
+<style>
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
-setInterval(criarAsteroide, 800);
+header {
+    text-align: center;
+    padding: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    background: #111;
+    border-bottom: 1px solid #333;
+}
 
-// loop do jogo
-setInterval(() => {
-  score++;
-  info.innerText = "Pontos: " + score;
+#display {
+    padding: 20px;
+    font-size: 32px;
+    text-align: right;
+    background: #000;
+    min-height: 60px;
+}
 
-  asteroides.forEach((a, i) => {
-    let top = parseInt(a.style.top) || 0;
-    a.style.top = top + 7 + "px";
+#buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    padding: 10px;
+    flex: 1;
+}
 
-    let naveRect = nave.getBoundingClientRect();
-    let aRect = a.getBoundingClientRect();
+button {
+    padding: 20px;
+    font-size: 20px;
+    border-radius: 12px;
+    border: none;
+    background: #222;
+    color: white;
+}
 
-    // colisão
-    if (
-      naveRect.left < aRect.right &&
-      naveRect.right > aRect.left &&
-      naveRect.top < aRect.bottom &&
-      naveRect.bottom > aRect.top
-    ) {
-      alert("GAME OVER 💀");
-      location.reload();
+.op {
+    background: #ff9800;
+}
+
+.equal {
+    background: #00c853;
+}
+
+.clear {
+    background: #e53935;
+}
+</style>
+</head>
+
+<body>
+
+<header>🧮 DEPE</header>
+
+<div id="display">0</div>
+
+<div id="buttons">
+    <button onclick="add('7')">7</button>
+    <button onclick="add('8')">8</button>
+    <button onclick="add('9')">9</button>
+    <button class="op" onclick="add('/')">÷</button>
+
+    <button onclick="add('4')">4</button>
+    <button onclick="add('5')">5</button>
+    <button onclick="add('6')">6</button>
+    <button class="op" onclick="add('*')">×</button>
+
+    <button onclick="add('1')">1</button>
+    <button onclick="add('2')">2</button>
+    <button onclick="add('3')">3</button>
+    <button class="op" onclick="add('-')">−</button>
+
+    <button onclick="add('0')">0</button>
+    <button onclick="add('.')">.</button>
+    <button class="equal" onclick="calc()">=</button>
+    <button class="op" onclick="add('+')">+</button>
+
+    <button class="clear" onclick="clearDisplay()">C</button>
+</div>
+
+<script>
+let display = document.getElementById("display");
+
+function add(val) {
+    if (display.innerText === "0") display.innerText = "";
+    display.innerText += val;
+}
+
+function clearDisplay() {
+    display.innerText = "0";
+}
+
+function calc() {
+    try {
+        display.innerText = eval(display.innerText);
+    } catch {
+        display.innerText = "Erro";
     }
-
-    // remover quando sair
-    if (top > window.innerHeight) {
-      a.remove();
-      asteroides.splice(i, 1);
-    }
-  });
-
-}, 50);
+}
 </script>
+
+</body>
+</html>
