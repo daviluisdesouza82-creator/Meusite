@@ -13,14 +13,12 @@ body {
   text-align:center;
 }
 
-/* jogo */
 canvas {
   background:#111;
   display:block;
   margin:auto;
 }
 
-/* botões embaixo */
 .controls {
   position: fixed;
   bottom: 0;
@@ -38,7 +36,6 @@ button {
   font-size: 18px;
 }
 
-/* espaço pro botão não tampar o jogo */
 .spacer {
   height: 80px;
 }
@@ -66,18 +63,27 @@ const ctx = canvas.getContext("2d");
 let img = new Image();
 img.src = "https://upload.wikimedia.org/wikipedia/en/2/2c/Nyan_cat_250px_frame.PNG";
 
+let loaded = false;
+let gameOver = false;
+
 let y = 150;
 let velocity = 0;
 let gravity = 0.6;
 let score = 0;
-let running = true;
+let running = false;
+
+// só começa quando carregar
+img.onload = () => {
+  loaded = true;
+  running = true;
+};
 
 // botão
 function jump() {
-  if (running) velocity = -10;
+  if (running && !gameOver) velocity = -10;
 }
 
-// toque na tela
+// toque
 canvas.addEventListener("touchstart", () => {
   jump();
 });
@@ -86,25 +92,37 @@ canvas.addEventListener("touchstart", () => {
 function draw() {
   ctx.clearRect(0,0,300,350);
 
+  if (!loaded) {
+    ctx.fillStyle = "white";
+    ctx.fillText("Carregando...", 100, 150);
+    return;
+  }
+
   ctx.drawImage(img, 110, y, 80, 50);
 
-  ctx.fillStyle = "white";
-  ctx.fillText("Toque pra voar", 90, 20);
+  if (gameOver) {
+    ctx.fillStyle = "red";
+    ctx.font = "20px sans-serif";
+    ctx.fillText("VOCÊ MORREU", 70, 150);
+  }
 }
 
 // atualizar
 function update() {
-  if (running) {
+  if (running && !gameOver) {
     velocity += gravity;
     y += velocity;
 
     score++;
     document.getElementById("score").innerText = "Score: " + score;
 
-    if (y > 300) {
+    // morreu se cair
+    if (y >= 300) {
       y = 300;
-      velocity = 0;
+      gameOver = true;
+      running = false;
     }
+
     if (y < 0) {
       y = 0;
       velocity = 0;
@@ -117,7 +135,7 @@ function update() {
 
 // pause
 function pauseGame() {
-  running = !running;
+  if (!gameOver) running = !running;
 }
 
 // restart
@@ -125,6 +143,7 @@ function restartGame() {
   y = 150;
   velocity = 0;
   score = 0;
+  gameOver = false;
   running = true;
 }
 
