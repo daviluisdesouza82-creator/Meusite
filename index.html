@@ -23,7 +23,10 @@ canvas {
   background:white;
   display:block;
   margin:auto;
-  touch-action:none;
+
+  /* 🔍 ZOOM (câmera mais perto) */
+  transform: scale(1.5);
+  transform-origin: top center;
 }
 
 .controls {
@@ -49,7 +52,8 @@ button, input {
   <div>Ib: Ibis Paint x</div>
 </div>
 
-<canvas id="canvas" width="320" height="400"></canvas>
+<!-- resolução maior (melhor qualidade) -->
+<canvas id="canvas" width="600" height="800"></canvas>
 
 <div class="controls">
   🎨 <input type="color" id="color">
@@ -76,7 +80,7 @@ let mode = "brush";
 let frames = [];
 let currentFrame = 0;
 
-// eventos toque
+// toque
 canvas.addEventListener("touchstart", start);
 canvas.addEventListener("touchmove", draw);
 canvas.addEventListener("touchend", stop);
@@ -94,8 +98,11 @@ function draw(e){
   if(!drawing) return;
 
   const rect = canvas.getBoundingClientRect();
-  const x = e.touches[0].clientX - rect.left;
-  const y = e.touches[0].clientY - rect.top;
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+
+  const x = (e.touches[0].clientX - rect.left) * scaleX;
+  const y = (e.touches[0].clientY - rect.top) * scaleY;
 
   ctx.lineWidth = document.getElementById("size").value;
   ctx.lineCap = "round";
@@ -113,13 +120,8 @@ function draw(e){
 }
 
 // modos
-function setBrush(){
-  mode = "brush";
-}
-
-function setEraser(){
-  mode = "eraser";
-}
+function setBrush(){ mode = "brush"; }
+function setEraser(){ mode = "eraser"; }
 
 // limpar
 function clearCanvas(){
@@ -159,7 +161,7 @@ function playAnim(){
   if(frames.length === 0) return;
 
   let i = 0;
-  let interval = setInterval(() => {
+  setInterval(() => {
     let img = new Image();
     img.src = frames[i];
 
