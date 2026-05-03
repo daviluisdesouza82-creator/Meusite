@@ -2,152 +2,137 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Nyan Game</title>
+<title>Sla</title>
 
 <style>
 body {
   margin:0;
-  background:black;
+  background:#0f0f0f;
   color:white;
   font-family:sans-serif;
+}
+
+/* topo */
+.header {
+  background:#202020;
+  padding:10px;
+  display:flex;
+  align-items:center;
+}
+
+.logo {
+  font-weight:bold;
+  font-size:20px;
+  margin-right:10px;
+}
+
+input {
+  flex:1;
+  padding:10px;
+  font-size:16px;
+  border:none;
+  outline:none;
+  border-radius:5px;
+}
+
+/* vídeos */
+.videos {
+  padding:10px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:15px;
+}
+
+.video {
+  background:#181818;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+iframe {
+  width:100%;
+  height:200px;
+  border:none;
+}
+
+.title {
+  padding:10px;
+  font-size:15px;
+}
+
+/* barra inferior */
+.bottom {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background:#202020;
+  display:flex;
+  justify-content:space-around;
+  padding:10px;
+}
+
+.bottom div {
   text-align:center;
-}
-
-canvas {
-  background:#111;
-  display:block;
-  margin:auto;
-}
-
-.controls {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #000;
-  display: flex;
-  justify-content: space-around;
-  padding: 10px;
-}
-
-button {
-  width: 90px;
-  height: 50px;
-  font-size: 18px;
-}
-
-.spacer {
-  height: 80px;
+  font-size:14px;
 }
 </style>
 </head>
 
 <body>
 
-<h2 id="score">Score: 0</h2>
+<div class="header">
+  <div class="logo">Sla</div>
+  <input type="text" id="search" placeholder="Pesquisar..." oninput="searchVideos()">
+</div>
 
-<canvas id="game" width="300" height="350"></canvas>
+<div class="videos" id="videos"></div>
 
-<div class="spacer"></div>
+<div style="height:70px;"></div>
 
-<div class="controls">
-  <button onclick="jump()">⬆️</button>
-  <button onclick="pauseGame()">⏸</button>
-  <button onclick="restartGame()">🔄</button>
+<div class="bottom">
+  <div>🏠 Home</div>
+  <div>🔥 Em alta</div>
+  <div>📺 Inscrições</div>
 </div>
 
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
+const videoList = [
+  {title:"Milkurtz - Vídeo", id:"QH2-TGUlwu4"},
+  {title:"Jazzghost - Minecraft", id:"MmB9b5njVbA"},
+  {title:"MelBoniTao - Gameplay", id:"2g811Eo7K8U"},
+  {title:"PlayGuima - Highlights", id:"J---aiyznGQ"},
+  {title:"Milkurtz - Outro vídeo", id:"dQw4w9WgXcQ"},
+  {title:"Jazzghost - Aventura", id:"9bZkp7q19f0"},
+  {title:"MelBoniTao - Desafio", id:"3JZ_D3ELwOQ"},
+  {title:"PlayGuima - Gameplay", id:"RgKAFK5djSk"}
+];
 
-let img = new Image();
-img.src = "https://upload.wikimedia.org/wikipedia/en/2/2c/Nyan_cat_250px_frame.PNG";
+function loadVideos(list) {
+  const container = document.getElementById("videos");
+  container.innerHTML = "";
 
-let loaded = false;
-let gameOver = false;
-
-let y = 150;
-let velocity = 0;
-let gravity = 0.6;
-let score = 0;
-let running = false;
-
-// só começa quando carregar
-img.onload = () => {
-  loaded = true;
-  running = true;
-};
-
-// botão
-function jump() {
-  if (running && !gameOver) velocity = -10;
+  list.forEach(v => {
+    container.innerHTML += `
+      <div class="video">
+        <iframe src="https://www.youtube.com/embed/${v.id}"></iframe>
+        <div class="title">${v.title}</div>
+      </div>
+    `;
+  });
 }
 
-// toque
-canvas.addEventListener("touchstart", () => {
-  jump();
-});
+function searchVideos() {
+  let text = document.getElementById("search").value.toLowerCase();
 
-// desenhar
-function draw() {
-  ctx.clearRect(0,0,300,350);
+  let filtered = videoList.filter(v =>
+    v.title.toLowerCase().includes(text)
+  );
 
-  if (!loaded) {
-    ctx.fillStyle = "white";
-    ctx.fillText("Carregando...", 100, 150);
-    return;
-  }
-
-  ctx.drawImage(img, 110, y, 80, 50);
-
-  if (gameOver) {
-    ctx.fillStyle = "red";
-    ctx.font = "20px sans-serif";
-    ctx.fillText("VOCÊ MORREU", 70, 150);
-  }
+  loadVideos(filtered);
 }
 
-// atualizar
-function update() {
-  if (running && !gameOver) {
-    velocity += gravity;
-    y += velocity;
-
-    score++;
-    document.getElementById("score").innerText = "Score: " + score;
-
-    // morreu se cair
-    if (y >= 300) {
-      y = 300;
-      gameOver = true;
-      running = false;
-    }
-
-    if (y < 0) {
-      y = 0;
-      velocity = 0;
-    }
-  }
-
-  draw();
-  requestAnimationFrame(update);
-}
-
-// pause
-function pauseGame() {
-  if (!gameOver) running = !running;
-}
-
-// restart
-function restartGame() {
-  y = 150;
-  velocity = 0;
-  score = 0;
-  gameOver = false;
-  running = true;
-}
-
-update();
+// iniciar
+loadVideos(videoList);
 </script>
 
 </body>
