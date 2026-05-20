@@ -1,2 +1,534 @@
-<html></html>
-<botton> </botton> <onclick></onclick>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Backrooms Terror 3D</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      overflow: hidden;
+      background: #000;
+      font-family: Arial, sans-serif;
+    }
+
+    canvas {
+      display: block;
+    }
+
+    #hud {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      padding: 14px;
+      color: white;
+      z-index: 20;
+      pointer-events: none;
+      text-shadow: 0 0 10px black;
+    }
+
+    #message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      z-index: 30;
+      background: rgba(0,0,0,0.7);
+      padding: 20px;
+      border-radius: 12px;
+      width: 85%;
+      max-width: 400px;
+    }
+
+    #crosshair {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 50%;
+      z-index: 10;
+      box-shadow: 0 0 10px white;
+    }
+
+    #controls {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 45%;
+      z-index: 50;
+    }
+
+    .joystick {
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.08);
+      border: 2px solid rgba(255,255,255,0.2);
+      bottom: 25px;
+    }
+
+    #moveZone {
+      left: 20px;
+    }
+
+    #lookZone {
+      right: 20px;
+    }
+
+    .stick {
+      position: absolute;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.35);
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 20px rgba(255,255,255,0.3);
+    }
+
+    #flashlightBtn {
+      position: fixed;
+      right: 25px;
+      top: 90px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 28px;
+      z-index: 60;
+      backdrop-filter: blur(4px);
+    }
+
+    #battery {
+      margin-top: 10px;
+      width: 200px;
+      height: 18px;
+      border: 2px solid white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    #batteryFill {
+      width: 100%;
+      height: 100%;
+      background: lime;
+      transition: width 0.2s;
+    }
+
+    .glitch {
+      animation: glitch 0.15s infinite;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0px,0px); }
+      25% { transform: translate(2px,-1px); }
+      50% { transform: translate(-2px,1px); }
+      75% { transform: translate(1px,2px); }
+      100% { transform: translate(0px,0px); }
+    }
+  </style>
+</head>
+<body>
+
+<div id="hud">
+  <h2>BACKROOMS</h2>
+  <p>Encontre a saída...</p>
+  <div id="battery">
+    <div id="batteryFill"></div>
+  </div>
+</div>
+
+<div id="message">
+  <h2>BACKROOMS</h2>
+  <br>
+  <p>Você caiu em um lugar que não deveria existir.</p>
+  <br>
+  <p>Use os controles na tela.</p>
+  <br>
+  <p>Evite a criatura.</p>
+  <br>
+  <p>Toque para começar</p>
+</div>
+
+<div id="crosshair"></div>
+
+<button id="flashlightBtn">🔦</button>
+
+<div id="controls">
+  <div id="moveZone" class="joystick">
+    <div class="stick"></div>
+  </div>
+
+  <div id="lookZone" class="joystick">
+    <div class="stick"></div>
+  </div>
+</div>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164/build/three.module.js';
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x0f0f08, 0.03);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild(renderer.domElement);
+
+const ambient = new THREE.AmbientLight(0x555533, 0.5);
+scene.add(ambient);
+
+const light = new THREE.PointLight(0xffeeaa, 0.6, 25);
+light.position.set(0,4,0);
+light.castShadow = true;
+scene.add(light);
+
+const flashlight = new THREE.SpotLight(0xffffff, 4, 30, Math.PI/8, 0.4, 1);
+flashlight.position.set(0,0,0);
+flashlight.castShadow = true;
+scene.add(flashlight);
+scene.add(flashlight.target);
+
+camera.position.set(0, 1.7, 0);
+
+const floorTexture = createNoiseTexture('#8f8550', '#a59a60');
+const wallTexture = createNoiseTexture('#c2ba72', '#b8b06b');
+
+floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
+wallTexture.wrapS = wallTexture.wrapT = THREE.RepeatWrapping;
+
+floorTexture.repeat.set(40,40);
+wallTexture.repeat.set(4,2);
+
+const floor = new THREE.Mesh(
+  new THREE.PlaneGeometry(200, 200),
+  new THREE.MeshStandardMaterial({ map: floorTexture })
+);
+floor.rotation.x = -Math.PI/2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+const walls = [];
+
+function createWall(x,z,w,d){
+  const wall = new THREE.Mesh(
+    new THREE.BoxGeometry(w,4,d),
+    new THREE.MeshStandardMaterial({
+      map: wallTexture,
+      roughness: 1
+    })
+  );
+
+  wall.position.set(x,2,z);
+  wall.castShadow = true;
+  wall.receiveShadow = true;
+  scene.add(wall);
+  walls.push(wall);
+}
+
+for(let i=-90;i<90;i+=12){
+  for(let j=-90;j<90;j+=12){
+    if(Math.random() > 0.55){
+      createWall(i,j,10,1);
+    }
+
+    if(Math.random() > 0.55){
+      createWall(i,j,1,10);
+    }
+  }
+}
+
+createWall(0,-100,200,1);
+createWall(0,100,200,1);
+createWall(-100,0,1,200);
+createWall(100,0,1,200);
+
+const exitDoor = new THREE.Mesh(
+  new THREE.BoxGeometry(4,5,0.5),
+  new THREE.MeshStandardMaterial({ color: 0x00ff99, emissive: 0x00ff99 })
+);
+exitDoor.position.set(85,2.5,85);
+scene.add(exitDoor);
+
+const monster = new THREE.Group();
+
+const body = new THREE.Mesh(
+  new THREE.BoxGeometry(1.5,3,1.5),
+  new THREE.MeshStandardMaterial({ color: 0x111111 })
+);
+body.position.y = 1.5;
+monster.add(body);
+
+const head = new THREE.Mesh(
+  new THREE.SphereGeometry(0.7,16,16),
+  new THREE.MeshStandardMaterial({ color: 0x000000 })
+);
+head.position.y = 3.5;
+monster.add(head);
+
+const eye1 = new THREE.Mesh(
+  new THREE.SphereGeometry(0.08),
+  new THREE.MeshBasicMaterial({ color: 'red' })
+);
+
+const eye2 = eye1.clone();
+
+eye1.position.set(-0.15,3.55,0.6);
+eye2.position.set(0.15,3.55,0.6);
+monster.add(eye1);
+monster.add(eye2);
+
+monster.position.set(30,0,30);
+scene.add(monster);
+
+const moveInput = {x:0,y:0};
+const lookInput = {x:0,y:0};
+
+createJoystick('moveZone', moveInput);
+createJoystick('lookZone', lookInput);
+
+function createJoystick(id, input){
+  const zone = document.getElementById(id);
+  const stick = zone.querySelector('.stick');
+
+  let dragging = false;
+
+  zone.addEventListener('touchstart', ()=> dragging=true);
+
+  zone.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+
+    const touch = e.touches[0];
+    const rect = zone.getBoundingClientRect();
+
+    let x = touch.clientX - rect.left - rect.width/2;
+    let y = touch.clientY - rect.top - rect.height/2;
+
+    const dist = Math.hypot(x,y);
+    const max = 40;
+
+    if(dist > max){
+      x = x / dist * max;
+      y = y / dist * max;
+    }
+
+    stick.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
+
+    input.x = x / max;
+    input.y = y / max;
+  });
+
+  zone.addEventListener('touchend', ()=>{
+    dragging = false;
+    input.x = 0;
+    input.y = 0;
+    stick.style.transform = 'translate(-50%, -50%)';
+  });
+}
+
+let flashlightOn = true;
+let battery = 100;
+
+const batteryFill = document.getElementById('batteryFill');
+
+flashlight.position.copy(camera.position);
+
+const flashlightBtn = document.getElementById('flashlightBtn');
+flashlightBtn.onclick = ()=>{
+  flashlightOn = !flashlightOn;
+  flashlight.visible = flashlightOn;
+};
+
+let yaw = 0;
+let pitch = 0;
+
+const clock = new THREE.Clock();
+
+let gameStarted = false;
+
+const message = document.getElementById('message');
+message.onclick = ()=>{
+  gameStarted = true;
+  message.style.display = 'none';
+};
+
+function createNoiseTexture(c1,c2){
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = c1;
+  ctx.fillRect(0,0,128,128);
+
+  for(let i=0;i<4000;i++){
+    ctx.fillStyle = Math.random()>0.5 ? c1 : c2;
+    ctx.fillRect(Math.random()*128, Math.random()*128, 2, 2);
+  }
+
+  return new THREE.CanvasTexture(canvas);
+}
+
+function collide(pos){
+  for(const wall of walls){
+    const box = new THREE.Box3().setFromObject(wall);
+
+    if(box.containsPoint(pos)){
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+
+  const delta = clock.getDelta();
+
+  if(gameStarted){
+
+    yaw -= lookInput.x * delta * 2.2;
+    pitch -= lookInput.y * delta * 1.5;
+
+    pitch = Math.max(-1.2, Math.min(1.2, pitch));
+
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
+
+    const speed = 6 * delta;
+
+    const forward = new THREE.Vector3(
+      Math.sin(yaw),
+      0,
+      Math.cos(yaw)
+    );
+
+    const right = new THREE.Vector3(
+      Math.cos(yaw),
+      0,
+      -Math.sin(yaw)
+    );
+
+    let move = new THREE.Vector3();
+
+    move.add(forward.clone().multiplyScalar(moveInput.y * speed));
+    move.add(right.clone().multiplyScalar(-moveInput.x * speed));
+
+    const nextPos = camera.position.clone().add(move);
+
+    if(!collide(nextPos)){
+      camera.position.copy(nextPos);
+    }
+
+    flashlight.position.copy(camera.position);
+    flashlight.target.position.copy(
+      camera.position.clone().add(
+        new THREE.Vector3(
+          Math.sin(yaw),
+          Math.sin(-pitch),
+          Math.cos(yaw)
+        )
+      )
+    );
+
+    if(flashlightOn && battery > 0){
+      battery -= delta * 1.8;
+    }
+
+    if(battery <= 0){
+      flashlight.visible = false;
+      battery = 0;
+    }
+
+    batteryFill.style.width = battery + '%';
+
+    if(battery < 30){
+      batteryFill.style.background = 'orange';
+    }
+
+    if(battery < 10){
+      batteryFill.style.background = 'red';
+    }
+
+    const direction = camera.position.clone().sub(monster.position).normalize();
+    monster.position.add(direction.multiplyScalar(delta * 1.7));
+
+    monster.lookAt(camera.position);
+
+    const dist = monster.position.distanceTo(camera.position);
+
+    if(dist < 8){
+      document.body.classList.add('glitch');
+    } else {
+      document.body.classList.remove('glitch');
+    }
+
+    if(dist < 2){
+      message.style.display = 'block';
+      message.innerHTML = `
+        <h2>VOCÊ MORREU</h2>
+        <br>
+        <p>A criatura te encontrou...</p>
+        <br>
+        <p>Recarregue a página para jogar novamente</p>
+      `;
+
+      gameStarted = false;
+    }
+
+    if(camera.position.distanceTo(exitDoor.position) < 5){
+      message.style.display = 'block';
+      message.innerHTML = `
+        <h2>VOCÊ ESCAPOU</h2>
+        <br>
+        <p>Você encontrou a saída das Backrooms.</p>
+        <br>
+        <p>Parabéns.</p>
+      `;
+
+      gameStarted = false;
+    }
+
+    if(Math.random() < 0.003){
+      light.intensity = Math.random() * 0.7;
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+window.addEventListener('resize', ()=>{
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+
+</body>
+</html>
